@@ -143,16 +143,49 @@ function onKeyStart(key) {
 	randomize();
 }
 
+// downloads the image
+// code from https://stackoverflow.com/questions/923885/capture-html-canvas-as-gif-jpg-png-pdf
+// users david.barkhuizen and donohoe
 function onClick(x,y) {
-	randomize();
+	clearRectangle(0, 0, screenWidth, screenHeight);
+
+	for(var i = 0; i < polygons.length; i++) {
+		polygons[i].draw();
+	}
+	
+	var img = document.getElementById("canvas").toDataURL("image/png");
+	
+	var dlLink = document.createElement('a');
+    dlLink.download = "lowPolyBackground.png";
+    dlLink.href = img;
+    dlLink.dataset.downloadurl = ["image/png", dlLink.download, dlLink.href].join(':');
+
+    document.body.appendChild(dlLink);
+    dlLink.click();
+    document.body.removeChild(dlLink);window.location.href = img;
 }
 
+var mouseX;
+var mouseY;
+function onMouseMove(x, y) {
+	mouseX = x;
+	mouseY = y;
+}
 // Called 30 times or more per second
 function onTick() {
     clearRectangle(0, 0, screenWidth, screenHeight);
 
 	for(var i = 0; i < polygons.length; i++) {
 		polygons[i].draw();
+	}
+	fillPolygon([0,0, 0,100, 100,100, 100,0], makeColor(0.5,0.5,0.5,0.5));
+	fillText("?", 50, 50, makeColor(0.1,0.1,0.1,1), "bold 48px sans-serif", "center", "middle");
+	
+	if(mouseX >= 0 && mouseX <= 100 && mouseY >= 0 && mouseY <= 100) {
+		fillPolygon([0,0, 0,screenHeight, screenWidth,screenHeight, screenWidth,0], makeColor(0.5,0.5,0.5,0.5));
+		fillText("Click anywhere to download image", screenWidth/2, screenHeight/2 - 50, makeColor(0.1,0.1,0.1,1), "bold 64px sans-serif", "center", "middle");
+		fillText("Press any key for a new background", screenWidth/2, screenHeight/2 + 50, makeColor(0.1,0.1,0.1,1), "bold 64px sans-serif", "center", "middle");
+		fillText("Created by Jimmie Harkins", 20, screenHeight - 30, makeColor(0.1,0.1,0.1,1), "36px sans-serif", "left", "middle")
 	}
 	//for(var i = 0; i < lines.length; i++) {
 	//	lines[i].draw();
