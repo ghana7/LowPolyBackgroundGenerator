@@ -1,18 +1,3 @@
-class Triangle {
-	constructor(p1, p2, p3) {
-		this.p1 = p1; //Point
-		this.p2 = p2; //Point
-		this.p3 = p3; //Point
-		this.red = (p1.red + p2.red + p3.red) / 3; //Number
-		this.blue = (p1.blue + p2.blue + p3.blue) / 3; //Number
-		this.green = (p1.green + p2.green + p3.green) / 3; //Number
-	}
-	
-	draw() {
-		fillPolygon([this.p1.x, this.p1.y, this.p2.x, this.p2.y, this.p3.x, this.p3.y], makeColor(this.red, this.green, this.blue, 1));
-	}
-}
-
 class Polygon {
 	constructor(...args) {
 		this.points = args;
@@ -60,7 +45,6 @@ class Point {
 		return "(" + this.x + ", " + this.y + ")";
 	}
 }
-
 class Line {
 	constructor(p1, p2) {
 		this.p1 = p1;
@@ -117,7 +101,6 @@ class Line {
 //                                                           //
 //                    CONSTANT STATE                         //
 
-// TODO: DECLARE and INTIALIZE your constants here
 var START_TIME = currentTime();
 
 var TOP_LEFT_RED = Math.random();
@@ -132,48 +115,45 @@ var TOP_RIGHT_RED = Math.random();
 var TOP_RIGHT_GREEN = Math.random();
 var TOP_RIGHT_BLUE = Math.random();
 
-var UPDATING_LIVE = false;
-
 var MAX_LINE_LENGTH = 420;
+
 ///////////////////////////////////////////////////////////////
 //                                                           //
 //                     MUTABLE STATE                         //
 
-// TODO: DECLARE your variables here
 var lastKeyCode;
 var points;
-var triangles;
 var lines;
 var polygons;
 var voidPointsRemaining;
+
 ///////////////////////////////////////////////////////////////
 //                                                           //
 //                      EVENT RULES                          //
 
-// When setup happens...
 function onSetup() {
-    // TODO: INITIALIZE your variables here
 	points = [];
-	triangles = [];
 	polygons = [];
 	lines = [];
 	voidPointsRemaining = [];
+	
+	//generate 50 randomly placed points
 	for(var i = 0; i < 50; i++) {
 		var x = Math.random() * screenWidth;
 		var y = Math.random() * screenHeight;
 		
 		points.push(new Point(x, y));
 	}
+	
+	//create points on corners of screen
 	points.push(new Point(0, 0));
 	points.push(new Point(0, screenHeight));
 	points.push(new Point(screenWidth, 0));
 	points.push(new Point(screenWidth, screenHeight));
-	if(!UPDATING_LIVE) {
-		spreadPointArray(points, 1000);
-		
-		generateObjects();
-	}
-	console.log(polygons);
+	
+	spreadPointArray(points, 1000);
+	generateObjects();
+	
     lastKeyCode = 0;
 }
 
@@ -186,21 +166,8 @@ function onKeyStart(key) {
 
 // Called 30 times or more per second
 function onTick() {
-	
-	
-	if(UPDATING_LIVE) {
-		generateObjects();
-		spreadPointArray(points, 1);
-	}
-	
-	
-	
     clearRectangle(0, 0, screenWidth, screenHeight);
 
-    
-	//for(var i = 0; i < triangles.length; i++) {
-	//	triangles[i].draw();
-	//}
 	for(var i = 0; i < polygons.length; i++) {
 		polygons[i].draw();
 	}
@@ -221,6 +188,7 @@ function onTick() {
 //                                                           //
 //                      HELPER RULES                         //
 
+//Does all the work generating lines and polygons from the points
 function generateObjects() {
 	for(var i = 0; i < points.length - 1; i++) {
 		for(var j = i + 1; j < points.length; j++) {
@@ -231,7 +199,6 @@ function generateObjects() {
 	}
 	cleanUpEdges(points, lines);
 	clearIntersections(lines);
-	cleanUpEdges(points, lines);
 	
 	for(var i = 0; i < points.length - 2; i++) {
 		for(var j = i + 1; j < points.length - 1; j++) {
@@ -299,7 +266,7 @@ function generateObjects() {
 	}
 }
 
-
+//Spreads all points a distance of 1 pixel away from the nearest point
 function spreadPointArray(pointArray, iterations) {
 	for(var i = 0; i < iterations; i++) {
 		for(var j = 0; j < pointArray.length; j++) {
@@ -329,6 +296,7 @@ function spreadPointArray(pointArray, iterations) {
 	}
 }
 
+//gets the closest point in pointArray to the given point
 function getClosestPoint(point, pointArray) {
 	var minDistance = 100000;
 	var closestPoint;
@@ -342,46 +310,13 @@ function getClosestPoint(point, pointArray) {
 	return closestPoint;
 }
 
-function distanceFromWall(point) {
-	var minDistance = 100000;
-	if(point.x < screenWidth / 2) {
-		if(point.x < minDistance) {
-			minDistance = point.x;
-		}
-	} else {
-		if(screenWidth - point.x < minDistance) {
-			minDistance = screenWidth - point.x;
-		}
-	}
-	if(point.y < screenHeight / 2) {
-		if(point.y < minDistance) {
-			minDistance = point.y;
-		}
-	} else {
-		if(screenHeight - point.y < minDistance) {
-			minDistance = screenHeight - point.y;
-		}
-	}
-	return minDistance;
-}
-
+//gets the distance between two points
 function distanceBetween(point1, point2) {
 	return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
 }
 
-function triArea(point1, point2, point3) {
-	return Math.abs(point1.x * (point2.y - point3.y) + point2.x * (point3.y - point1.y) + point3.x * (point1.y - point2.y))/2;
-}
-
-function isAcute(point1, point2, point3) {
-	var distance1 = distanceBetween(point1, point2);
-	var distance2 = distanceBetween(point2, point3);
-	var distance3 = distanceBetween(point1, point3);
-	var max = Math.max(distance1, distance2, distance3);
-	
-	return(max * max < (distance1 * distance1 + distance2 * distance2 + distance3 * distance3 - max * max));
-}
-
+//gets the orientation of three points relative to each other (clockwise, counterclockwise, or collinear)
+//read more at https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 function orientation(p1, p2, p3) {
 	var tempValue = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) *(p3.y - p2.y);
 	if(tempValue == 0) {
@@ -394,6 +329,8 @@ function orientation(p1, p2, p3) {
 	}
 }
 
+//checks if p2 (a point collinear with p1 and p3) is on segment p1p3
+//read more at https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 function onSegment(p1, p2, p3) {
 	if(p2.x <= Math.max(p1.x, p3.x) && p2.x >= Math.max(p1.x, p3.x) && p2.y <= Math.max(p1.y, p3.y) && p2.y >= Math.max(p1.y, p3.y)) {
 		return true;
@@ -401,6 +338,8 @@ function onSegment(p1, p2, p3) {
 	
 	return false;
 }
+
+//runs through lineArray and deletes all lines intersecting with other lines
 function clearIntersections(lineArray) {
 	for(var i = 0; i < lineArray.length - 1; i++) {
 		for(var j = i + 1; j < lineArray.length; j++) {
@@ -413,6 +352,8 @@ function clearIntersections(lineArray) {
 	}
 }
 
+//makes sure all edge points are connected to each other
+//adds new lines if any are not
 function cleanUpEdges(pointArray, lineArray) {
 	
 	for(var i = 0; i < pointArray.length - 1; i++) {
@@ -469,14 +410,7 @@ function cleanUpEdges(pointArray, lineArray) {
 	}*/
 }
 
-function isOnEdge(point) {
-	if(point.x == 0) return 1;
-	if(point.y == 0) return 2;
-	if(point.x == screenWidth) return 3;
-	if(point.y == screenHeight) return 4;
-	return 0;
-}
-
+//checks whether two points are on the same edge of the screen
 function areOnSameEdge(point1, point2) {
 	if(point1.x == 0 && point2.x == 0) return true;
 	if(point1.y == 0 && point2.y == 0) return true;
@@ -484,6 +418,8 @@ function areOnSameEdge(point1, point2) {
 	if(point1.y == screenHeight && point2.y == screenHeight) return true;
 	return false;
 }
+
+//checks whether a given line is an edge of given triangle
 function isOnTriangle(line, triangle) {
 	var point1 = triangle.p1;
 	var point2 = triangle.p2;
@@ -505,10 +441,12 @@ function isOnTriangle(line, triangle) {
 	return false;
 }
 
+//checks whether a line is entirely on the edge of the screen
 function isEdgeLine(line) {
 	return((line.p1.x == 0 && line.p2.x == 0) || (line.p1.x == screenWidth && line.p2.x == screenWidth) || (line.p1.y == 0 && line.p2.y == 0) || (line.p1.y == screenHeight && line.p2.y == screenHeight));
 }
 
+//returns the line in lineArray connecting point1 and point2, or null if there is no such line
 function lineConnecting(point1, point2, lineArray) {
 	
 	for(var i = 0; i < lineArray.length; i++) {
@@ -521,6 +459,7 @@ function lineConnecting(point1, point2, lineArray) {
 	return null;
 }
 
+//checks if the lines in lineArray can form a hollow (no interior lines) polygon with points given in args
 function formsHollowPolygon(lineArray, ...args) {
 	//args; //array holding all the points being checked
 	var connectionsPerPoint = {};
@@ -555,6 +494,7 @@ function formsHollowPolygon(lineArray, ...args) {
 	
 }
 
+//finds all points bordering an area on the screen with no polygon or edge
 function findVoidPoints(pointArray, lineArray) {
 	var voidPoints = [];
 	for(var i = 0; i < lineArray.length; i++) {
