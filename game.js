@@ -132,29 +132,7 @@ var voidPointsRemaining;
 //                      EVENT RULES                          //
 defineGame("Low-Poly Background Generator", "Jimmie Harkins", "", "H", false);
 function onSetup() {
-	
-	points = [];
-	polygons = [];
-	lines = [];
-	voidPointsRemaining = [];
-	
-	//generate 50 randomly placed points
-	for(var i = 0; i < 50; i++) {
-		var x = Math.random() * screenWidth;
-		var y = Math.random() * screenHeight;
-		
-		points.push(new Point(x, y));
-	}
-	
-	//create points on corners of screen
-	points.push(new Point(0, 0));
-	points.push(new Point(0, screenHeight));
-	points.push(new Point(screenWidth, 0));
-	points.push(new Point(screenWidth, screenHeight));
-	
-	spreadPointArray(points, 1000);
-	generateObjects();
-	
+	randomize();
     lastKeyCode = 0;
 }
 
@@ -162,8 +140,12 @@ function onSetup() {
 // When a key is pushed
 function onKeyStart(key) {
     lastKeyCode = key;
+	randomize();
 }
 
+function onClick(x,y) {
+	randomize();
+}
 
 // Called 30 times or more per second
 function onTick() {
@@ -179,15 +161,55 @@ function onTick() {
 	//for(var i = 0; i < points.length; i++) {
 	//	points[i].draw();
 	//}
-	
-	
-	//spreadPointArray(points, 1);
 }
 
 
 ///////////////////////////////////////////////////////////////
 //                                                           //
 //                      HELPER RULES                         //
+
+
+function randomize() {
+	points = [];
+	polygons = [];
+	lines = [];
+	voidPointsRemaining = [];
+	
+	TOP_LEFT_RED = Math.random();
+	TOP_LEFT_GREEN = Math.random();
+	TOP_LEFT_BLUE = Math.random();
+	
+	BOT_LEFT_RED = Math.random();
+	BOT_LEFT_GREEN = Math.random();
+	BOT_LEFT_BLUE = Math.random();
+	
+	TOP_RIGHT_RED = Math.random();
+	TOP_RIGHT_GREEN = Math.random();
+	TOP_RIGHT_BLUE = Math.random();
+	
+	generatePoints();
+	generateObjects();
+	
+}
+
+//Generates and spreads random points around the screen
+function generatePoints() {
+	//generate 50 randomly placed points
+	for(var i = 0; i < 50; i++) {
+		var x = Math.random() * screenWidth;
+		var y = Math.random() * screenHeight;
+		
+		points.push(new Point(x, y));
+	}
+	
+	//create points on corners of screen
+	points.push(new Point(0, 0));
+	points.push(new Point(0, screenHeight));
+	points.push(new Point(screenWidth, 0));
+	points.push(new Point(screenWidth, screenHeight));
+	
+	spreadPointArray(points, 1000);
+}
 
 //Does all the work generating lines and polygons from the points
 function generateObjects() {
