@@ -132,6 +132,7 @@ var voidPointsRemaining;
 //                      EVENT RULES                          //
 
 function onSetup() {
+	defineGame("Low-Poly Background Generator", "Jimmie Harkins");
 	points = [];
 	polygons = [];
 	lines = [];
